@@ -23,7 +23,7 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://chatbot-backend-fv1d.onrender.com/api/chat", {
+      const res = await axios.post("https://chatbot-backend-3ryn.onrender.com/api/chat", {
         message: input,
       });
 
