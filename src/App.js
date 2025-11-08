@@ -43,7 +43,41 @@ function App() {
 
   const renderMessage = (msg, index) => {
     const isBot = msg.sender === "bot";
-    const className = isBot ? styles.botMessage : styles.userMessage;
+    
+    const messageStyle = {
+      display: "flex",
+      gap: window.innerWidth <= 768 ? "0.5rem" : "1rem",
+      marginBottom: "1rem",
+      ...(isBot 
+        ? { paddingRight: window.innerWidth <= 768 ? "5%" : "20%" }
+        : { 
+            flexDirection: "row-reverse", 
+            paddingLeft: window.innerWidth <= 768 ? "5%" : "20%" 
+          }
+      )
+    };
+
+    const avatarStyle = {
+      flexShrink: 0,
+      width: window.innerWidth <= 480 ? "28px" : "32px",
+      height: window.innerWidth <= 480 ? "28px" : "32px",
+      borderRadius: "4px",
+      backgroundColor: "#ececf1",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: window.innerWidth <= 480 ? "16px" : "18px",
+    };
+
+    const contentStyle = {
+      padding: window.innerWidth <= 768 ? "0.6rem 0.8rem" : "0.75rem 1rem",
+      borderRadius: "8px",
+      backgroundColor: "#ffffff",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+      lineHeight: 1.5,
+      color: "#374151",
+      fontSize: window.innerWidth <= 768 ? "0.9rem" : "0.95rem",
+    };
 
     const formattedText = msg.text
       .replace(/```([\s\S]*?)```/g, (_, code) => {
@@ -53,112 +87,25 @@ function App() {
       .replace(/\*(.*?)\*/g, "<em>$1</em>");
 
     return (
-      <div key={index} style={className}>
-        <div style={styles.avatar}>{isBot ? "🤖" : "👤"}</div>
+      <div key={index} style={messageStyle}>
+        <div style={avatarStyle}>{isBot ? "🤖" : "👤"}</div>
         <div
-          style={styles.messageContent}
+          style={contentStyle}
           dangerouslySetInnerHTML={{ __html: formattedText }}
         />
       </div>
     );
   };
 
-  return (
-    <div style={styles.wrapper}>
-      {/* Sidebar */}
-      <div style={styles.sidebar}>
-        <h3 style={styles.sidebarTitle}>MN AI</h3>
-        <ul style={styles.sidebarList}>
-          <li style={styles.sidebarItem}>💬 Chats</li>
-          <li style={styles.sidebarItem}>⚙️ Settings</li>
-          <li style={styles.sidebarItem}>❓ Help</li>
-        </ul>
-      </div>
-
-      {/* Chat Section */}
-      <div style={styles.chatWrapper}>
-        <div style={styles.header}>
-          <h2 style={styles.title}>MN AI Chat Assistant</h2>
-        </div>
-        <div ref={chatContainerRef} style={styles.chatContainer}>
-          <div style={styles.chatContent}>
-            {chatHistory.map(renderMessage)}
-            {loading && (
-              <div style={styles.botMessage}>
-                <div style={styles.avatar}>🤖</div>
-                <div style={styles.typingIndicator}>
-                  <div style={styles.dot}></div>
-                  <div style={styles.dot}></div>
-                  <div style={styles.dot}></div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            style={styles.input}
-            disabled={loading}
-          />
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? "Sending..." : "Send"}
-          </button>
-        </form>
-      </div>
-
-      {/* Responsive Styles */}
-      <style>{`
-        @media (max-width: 768px) {
-          .sidebar {
-            display: none !important;
-          }
-          .chatWrapper {
-            flex: 1 !important;
-            width: 100% !important;
-          }
-          .header {
-            text-align: center !important;
-          }
-          .messageContent {
-            font-size: 0.95rem !important;
-          }
-          .form {
-            flex-direction: column !important;
-          }
-          .input {
-            width: 100% !important;
-            margin-bottom: 0.5rem !important;
-          }
-          .button {
-            width: 100% !important;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .title {
-            font-size: 1rem !important;
-          }
-          .button {
-            font-size: 0.9rem !important;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-const styles = {
-  wrapper: {
+  const wrapperStyle = {
     fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
     height: "100vh",
     display: "flex",
     flexDirection: "row",
     backgroundColor: "#f0f2f5",
-  },
-  sidebar: {
+  };
+
+  const sidebarStyle = {
     width: "250px",
     backgroundColor: "#1f2937",
     color: "#fff",
@@ -166,125 +113,206 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
-  },
-  sidebarTitle: {
-    fontSize: "1.3rem",
-    fontWeight: "700",
-    marginBottom: "1rem",
-    textAlign: "center",
-  },
-  sidebarList: {
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  sidebarItem: {
-    cursor: "pointer",
-    fontSize: "1rem",
-    padding: "0.5rem 0.75rem",
-    borderRadius: "8px",
-    transition: "background-color 0.2s ease",
-  },
-  chatWrapper: {
+    ...(window.innerWidth <= 768 && { display: "none" })
+  };
+
+  const chatWrapperStyle = {
     flex: 1,
     display: "flex",
     flexDirection: "column",
     backgroundColor: "#f9fafb",
-  },
-  header: {
+    ...(window.innerWidth <= 768 && { width: "100%" })
+  };
+
+  const headerStyle = {
     backgroundColor: "#ffffff",
-    padding: "1rem",
+    padding: window.innerWidth <= 768 ? "0.75rem" : "1rem",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
     zIndex: 1,
-  },
-  title: {
+    ...(window.innerWidth <= 768 && { textAlign: "center" })
+  };
+
+  const titleStyle = {
     margin: 0,
     color: "#202123",
-    fontSize: "1.25rem",
+    fontSize: window.innerWidth <= 480 ? "1rem" : window.innerWidth <= 768 ? "1.1rem" : "1.25rem",
     fontWeight: "600",
-  },
-  chatContainer: {
-    flex: 1,
-    overflowY: "auto",
-    padding: "1rem",
-  },
-  chatContent: {
-    maxWidth: "768px",
-    margin: "0 auto",
-  },
-  botMessage: {
-    display: "flex",
-    gap: "1rem",
-    marginBottom: "1rem",
-    paddingRight: "20%",
-  },
-  userMessage: {
-    display: "flex",
-    flexDirection: "row-reverse",
-    gap: "1rem",
-    marginBottom: "1rem",
-    paddingLeft: "20%",
-  },
-  avatar: {
-    flexShrink: 0,
-    width: "32px",
-    height: "32px",
-    borderRadius: "4px",
-    backgroundColor: "#ececf1",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "18px",
-  },
-  messageContent: {
-    padding: "0.75rem 1rem",
-    borderRadius: "8px",
-    backgroundColor: "#ffffff",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-    lineHeight: 1.5,
-    color: "#374151",
-  },
-  typingIndicator: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-    padding: "0.75rem 1rem",
-  },
-  dot: {
-    width: "6px",
-    height: "6px",
-    borderRadius: "50%",
-    backgroundColor: "#666",
-    animation: "typing 1.4s infinite ease-in-out",
-  },
-  form: {
+  };
+
+  const formStyle = {
     display: "flex",
     gap: "0.5rem",
-    padding: "1rem",
+    padding: window.innerWidth <= 768 ? "0.75rem" : "1rem",
     backgroundColor: "#ffffff",
     boxShadow: "0 -1px 3px rgba(0,0,0,0.1)",
-  },
-  input: {
+    ...(window.innerWidth <= 768 && { flexDirection: "column" })
+  };
+
+  const inputStyle = {
     flex: 1,
     padding: "0.75rem 1rem",
     borderRadius: "8px",
     border: "1px solid #d1d5db",
-    fontSize: "1rem",
+    fontSize: window.innerWidth <= 768 ? "0.95rem" : "1rem",
     outline: "none",
-  },
-  button: {
-    padding: "0.75rem 1.5rem",
+    ...(window.innerWidth <= 768 && { 
+      width: "100%", 
+      marginBottom: "0.5rem" 
+    })
+  };
+
+  const buttonStyle = {
+    padding: window.innerWidth <= 768 ? "0.75rem" : "0.75rem 1.5rem",
     backgroundColor: "#3b82f6",
     color: "#ffffff",
     border: "none",
     borderRadius: "8px",
-    fontSize: "1rem",
+    fontSize: window.innerWidth <= 768 ? "0.95rem" : "1rem",
     fontWeight: "500",
     cursor: "pointer",
-  },
-};
+    ...(window.innerWidth <= 768 && { width: "100%" })
+  };
+
+  return (
+    <div style={wrapperStyle}>
+      {/* Sidebar - Hidden on mobile */}
+      <div style={sidebarStyle}>
+        <h3 style={{ fontSize: "1.3rem", fontWeight: "700", marginBottom: "1rem", textAlign: "center" }}>
+          MN AI
+        </h3>
+        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <li style={{ cursor: "pointer", fontSize: "1rem", padding: "0.5rem 0.75rem", borderRadius: "8px", transition: "background-color 0.2s ease" }}>
+            💬 Chats
+          </li>
+          <li style={{ cursor: "pointer", fontSize: "1rem", padding: "0.5rem 0.75rem", borderRadius: "8px", transition: "background-color 0.2s ease" }}>
+            ⚙️ Settings
+          </li>
+          <li style={{ cursor: "pointer", fontSize: "1rem", padding: "0.5rem 0.75rem", borderRadius: "8px", transition: "background-color 0.2s ease" }}>
+            ❓ Help
+          </li>
+        </ul>
+      </div>
+
+      {/* Chat Section */}
+      <div style={chatWrapperStyle}>
+        <div style={headerStyle}>
+          <h2 style={titleStyle}>MN AI Chat Assistant</h2>
+        </div>
+        <div 
+          ref={chatContainerRef} 
+          style={{ 
+            flex: 1, 
+            overflowY: "auto", 
+            padding: window.innerWidth <= 768 ? "0.75rem" : "1rem" 
+          }}
+        >
+          <div style={{ maxWidth: "768px", margin: "0 auto" }}>
+            {/* Initial bot message */}
+            {chatHistory.length === 0 && (
+              <div style={{
+                display: "flex",
+                gap: window.innerWidth <= 768 ? "0.5rem" : "1rem",
+                marginBottom: "1rem",
+                paddingRight: window.innerWidth <= 768 ? "5%" : "20%"
+              }}>
+                <div style={{
+                  flexShrink: 0,
+                  width: window.innerWidth <= 480 ? "28px" : "32px",
+                  height: window.innerWidth <= 480 ? "28px" : "32px",
+                  borderRadius: "4px",
+                  backgroundColor: "#ececf1",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: window.innerWidth <= 480 ? "16px" : "18px",
+                }}>🤖</div>
+                <div style={{
+                  padding: window.innerWidth <= 768 ? "0.6rem 0.8rem" : "0.75rem 1rem",
+                  borderRadius: "8px",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                  lineHeight: 1.5,
+                  color: "#374151",
+                  fontSize: window.innerWidth <= 768 ? "0.9rem" : "0.95rem",
+                }}>
+                  <strong>AI Assistant</strong><br />
+                  Hello! How can I help you today?<br />
+                  Feel free to ask me anything about our products, services, or policies.
+                </div>
+              </div>
+            )}
+            
+            {chatHistory.map(renderMessage)}
+            {loading && (
+              <div style={{
+                display: "flex",
+                gap: window.innerWidth <= 768 ? "0.5rem" : "1rem",
+                marginBottom: "1rem",
+                paddingRight: window.innerWidth <= 768 ? "5%" : "20%"
+              }}>
+                <div style={{
+                  flexShrink: 0,
+                  width: window.innerWidth <= 480 ? "28px" : "32px",
+                  height: window.innerWidth <= 480 ? "28px" : "32px",
+                  borderRadius: "4px",
+                  backgroundColor: "#ececf1",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: window.innerWidth <= 480 ? "16px" : "18px",
+                }}>🤖</div>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  padding: "0.75rem 1rem",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "8px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                }}>
+                  <div style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    backgroundColor: "#666",
+                    animation: "typing 1.4s infinite ease-in-out",
+                  }}></div>
+                  <div style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    backgroundColor: "#666",
+                    animation: "typing 1.4s infinite ease-in-out",
+                    animationDelay: "0.2s",
+                  }}></div>
+                  <div style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    backgroundColor: "#666",
+                    animation: "typing 1.4s infinite ease-in-out",
+                    animationDelay: "0.4s",
+                  }}></div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <form onSubmit={handleSubmit} style={formStyle}>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            style={inputStyle}
+            disabled={loading}
+          />
+          <button type="submit" style={buttonStyle} disabled={loading}>
+            {loading ? "Sending..." : "Send"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default App;
