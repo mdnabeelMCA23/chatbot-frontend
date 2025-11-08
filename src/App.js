@@ -77,7 +77,7 @@ function App() {
       {/* Chat Section */}
       <div style={styles.chatWrapper}>
         <div style={styles.header}>
-          <h2 style={styles.title}>Hina's AI Chat Assistant</h2>
+          <h2 style={styles.title}>MN AI Chat Assistant</h2>
         </div>
         <div ref={chatContainerRef} style={styles.chatContainer}>
           <div style={styles.chatContent}>
