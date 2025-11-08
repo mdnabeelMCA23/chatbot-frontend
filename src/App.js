@@ -54,9 +54,7 @@ function App() {
 
     return (
       <div key={index} style={className}>
-        <div style={styles.avatar}>
-          {isBot ? "🤖" : "👤"}
-        </div>
+        <div style={styles.avatar}>{isBot ? "🤖" : "👤"}</div>
         <div
           style={styles.messageContent}
           dangerouslySetInnerHTML={{ __html: formattedText }}
@@ -67,10 +65,13 @@ function App() {
 
   return (
     <div style={styles.wrapper}>
-      {/* Left Sidebar */}
+      {/* Sidebar */}
       <div style={styles.sidebar}>
+        <h3 style={styles.sidebarTitle}>MN AI</h3>
         <ul style={styles.sidebarList}>
-          <li>Chats</li>
+          <li style={styles.sidebarItem}>💬 Chats</li>
+          <li style={styles.sidebarItem}>⚙️ Settings</li>
+          <li style={styles.sidebarItem}>❓ Help</li>
         </ul>
       </div>
 
@@ -102,15 +103,49 @@ function App() {
             style={styles.input}
             disabled={loading}
           />
-          <button
-            type="submit"
-            style={styles.button}
-            disabled={loading}
-          >
+          <button type="submit" style={styles.button} disabled={loading}>
             {loading ? "Sending..." : "Send"}
           </button>
         </form>
       </div>
+
+      {/* Responsive Styles */}
+      <style>{`
+        @media (max-width: 768px) {
+          .sidebar {
+            display: none !important;
+          }
+          .chatWrapper {
+            flex: 1 !important;
+            width: 100% !important;
+          }
+          .header {
+            text-align: center !important;
+          }
+          .messageContent {
+            font-size: 0.95rem !important;
+          }
+          .form {
+            flex-direction: column !important;
+          }
+          .input {
+            width: 100% !important;
+            margin-bottom: 0.5rem !important;
+          }
+          .button {
+            width: 100% !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .title {
+            font-size: 1rem !important;
+          }
+          .button {
+            font-size: 0.9rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -119,11 +154,10 @@ const styles = {
   wrapper: {
     fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
     height: "100vh",
-    display: "flex", // Row layout for sidebar + chat
+    display: "flex",
     flexDirection: "row",
     backgroundColor: "#f0f2f5",
   },
-  // Sidebar Styles
   sidebar: {
     width: "250px",
     backgroundColor: "#1f2937",
@@ -134,9 +168,10 @@ const styles = {
     boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
   },
   sidebarTitle: {
-    fontSize: "1.2rem",
-    fontWeight: "600",
+    fontSize: "1.3rem",
+    fontWeight: "700",
     marginBottom: "1rem",
+    textAlign: "center",
   },
   sidebarList: {
     listStyle: "none",
@@ -144,15 +179,20 @@ const styles = {
     margin: 0,
     display: "flex",
     flexDirection: "column",
-    gap: "0.75rem",
-    cursor: "pointer",
+    gap: "1rem",
   },
-
-  // Chat section container
+  sidebarItem: {
+    cursor: "pointer",
+    fontSize: "1rem",
+    padding: "0.5rem 0.75rem",
+    borderRadius: "8px",
+    transition: "background-color 0.2s ease",
+  },
   chatWrapper: {
     flex: 1,
     display: "flex",
     flexDirection: "column",
+    backgroundColor: "#f9fafb",
   },
   header: {
     backgroundColor: "#ffffff",
