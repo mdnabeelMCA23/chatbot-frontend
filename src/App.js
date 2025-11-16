@@ -106,7 +106,6 @@ function App() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    // You could add a toast notification here
   };
 
   const exportChat = () => {
@@ -132,48 +131,79 @@ function App() {
     });
   };
 
-  // Responsive styles based on screen size
-  const getResponsiveStyle = (desktop, mobile) => {
-    return isMobile ? mobile : desktop;
-  };
+  // Get responsive styles
+  const responsiveStyle = (desktop, mobile) => isMobile ? mobile : desktop;
 
   return (
-    <div style={darkMode ? darkContainerStyle : lightContainerStyle}>
-      {/* Enhanced Header */}
-      <div style={darkMode ? darkHeaderStyle : lightHeaderStyle}>
-        <div style={getResponsiveStyle(headerContentStyle, mobileHeaderContentStyle)}>
+    <div style={responsiveStyle(
+      darkMode ? darkContainerStyle : lightContainerStyle,
+      darkMode ? mobileDarkContainerStyle : mobileLightContainerStyle
+    )}>
+      {/* Header */}
+      <div style={responsiveStyle(
+        darkMode ? darkHeaderStyle : lightHeaderStyle,
+        darkMode ? mobileDarkHeaderStyle : mobileLightHeaderStyle
+      )}>
+        <div style={responsiveStyle(headerContentStyle, mobileHeaderContentStyle)}>
           <div style={logoStyle}>
             <div style={darkMode ? darkLogoIconStyle : lightLogoIconStyle}>
               <span style={logoEmojiStyle}>💬</span>
             </div>
             <div style={logoTextStyle}>
               <h1 style={darkMode ? darkTitleStyle : lightTitleStyle}>
-                MN AI Assistant
+                {isMobile ? 'MN AI' : 'MN AI Assistant'}
               </h1>
-              <p style={darkMode ? darkSubtitleStyle : lightSubtitleStyle}>
-                Your intelligent conversation partner
-              </p>
+              {!isMobile && (
+                <p style={darkMode ? darkSubtitleStyle : lightSubtitleStyle}>
+                  Your intelligent conversation partner
+                </p>
+              )}
             </div>
           </div>
           
-          <div style={getResponsiveStyle(headerControlsStyle, mobileHeaderControlsStyle)}>
-            <button 
-              onClick={exportChat}
-              style={darkMode ? darkSecondaryButtonStyle : lightSecondaryButtonStyle}
-              disabled={chatHistory.length === 0}
-            >
-              {isMobile ? '📥' : '📥 Export'}
-            </button>
-            <button 
-              onClick={clearChat}
-              style={darkMode ? darkSecondaryButtonStyle : lightSecondaryButtonStyle}
-              disabled={chatHistory.length === 0}
-            >
-              {isMobile ? '🗑️' : '🗑️ Clear'}
-            </button>
+          <div style={responsiveStyle(headerControlsStyle, mobileHeaderControlsStyle)}>
+            {!isMobile && (
+              <>
+                <button 
+                  onClick={exportChat}
+                  style={darkMode ? darkSecondaryButtonStyle : lightSecondaryButtonStyle}
+                  disabled={chatHistory.length === 0}
+                >
+                  📥 Export
+                </button>
+                <button 
+                  onClick={clearChat}
+                  style={darkMode ? darkSecondaryButtonStyle : lightSecondaryButtonStyle}
+                  disabled={chatHistory.length === 0}
+                >
+                  🗑️ Clear
+                </button>
+              </>
+            )}
+            {isMobile && (
+              <>
+                <button 
+                  onClick={exportChat}
+                  style={darkMode ? mobileDarkIconButtonStyle : mobileLightIconButtonStyle}
+                  disabled={chatHistory.length === 0}
+                  title="Export chat"
+                >
+                  📥
+                </button>
+                <button 
+                  onClick={clearChat}
+                  style={darkMode ? mobileDarkIconButtonStyle : mobileLightIconButtonStyle}
+                  disabled={chatHistory.length === 0}
+                  title="Clear chat"
+                >
+                  🗑️
+                </button>
+              </>
+            )}
             <button 
               onClick={() => setDarkMode(!darkMode)}
               style={darkMode ? darkThemeButtonStyle : lightThemeButtonStyle}
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {darkMode ? '☀️' : '🌙'}
             </button>
@@ -182,31 +212,38 @@ function App() {
       </div>
 
       {/* Chat Area */}
-      <div ref={chatContainerRef} style={chatAreaStyle}>
-        <div style={getResponsiveStyle(messagesContainerStyle, mobileMessagesContainerStyle)}>
+      <div 
+        ref={chatContainerRef} 
+        style={responsiveStyle(chatAreaStyle, mobileChatAreaStyle)}
+      >
+        <div style={responsiveStyle(messagesContainerStyle, mobileMessagesContainerStyle)}>
           {/* Welcome Message */}
           {chatHistory.length === 0 && (
-            <div style={getResponsiveStyle(welcomeContainerStyle, mobileWelcomeContainerStyle)}>
-              <div style={welcomeIconStyle}>🚀</div>
+            <div style={responsiveStyle(welcomeContainerStyle, mobileWelcomeContainerStyle)}>
+              <div style={responsiveStyle(welcomeIconStyle, mobileWelcomeIconStyle)}>🚀</div>
               <h3 style={darkMode ? darkWelcomeTitleStyle : lightWelcomeTitleStyle}>
-                Welcome to MN AI Assistant
+                {isMobile ? 'Welcome!' : 'Welcome to MN AI Assistant'}
               </h3>
               <p style={darkMode ? darkWelcomeTextStyle : lightWelcomeTextStyle}>
-                I'm here to help you with tasks, answer questions, and provide assistance. 
-                Let's start a conversation!
+                {isMobile 
+                  ? "I'm here to help you with tasks and answer questions." 
+                  : "I'm here to help you with tasks, answer questions, and provide assistance. Let's start a conversation!"
+                }
               </p>
               
               {/* Suggested Questions */}
               <div style={suggestionsContainerStyle}>
-                <p style={suggestionsTitleStyle}>Quick starters:</p>
-                <div style={getResponsiveStyle(suggestionsGridStyle, mobileSuggestionsGridStyle)}>
+                <p style={suggestionsTitleStyle}>
+                  {isMobile ? 'Quick questions:' : 'Quick starters:'}
+                </p>
+                <div style={responsiveStyle(suggestionsGridStyle, mobileSuggestionsGridStyle)}>
                   {suggestedQuestions.map((question, index) => (
                     <button
                       key={index}
                       onClick={() => handleQuickQuestion(question)}
                       style={darkMode ? darkSuggestionStyle : lightSuggestionStyle}
                     >
-                      {question}
+                      {isMobile ? question.split(' ').slice(0, 3).join(' ') + '...' : question}
                     </button>
                   ))}
                 </div>
@@ -216,17 +253,28 @@ function App() {
           
           {/* Chat History */}
           {chatHistory.map((msg) => (
-            <div key={msg.id} style={msg.sender === "bot" ? botMessageContainerStyle : userMessageContainerStyle}>
-              <div style={msg.sender === "bot" ? 
-                getResponsiveStyle(botMessageStyle, mobileBotMessageStyle) : 
-                getResponsiveStyle(userMessageStyle, mobileUserMessageStyle)}>
-                <div style={msg.sender === "bot" ? botAvatarStyle : userAvatarStyle}>
+            <div 
+              key={msg.id} 
+              style={responsiveStyle(
+                msg.sender === "bot" ? botMessageContainerStyle : userMessageContainerStyle,
+                msg.sender === "bot" ? mobileBotMessageContainerStyle : mobileUserMessageContainerStyle
+              )}
+            >
+              <div style={responsiveStyle(
+                msg.sender === "bot" ? botMessageStyle : userMessageStyle,
+                msg.sender === "bot" ? mobileBotMessageStyle : mobileUserMessageStyle
+              )}>
+                <div style={responsiveStyle(
+                  msg.sender === "bot" ? botAvatarStyle : userAvatarStyle,
+                  msg.sender === "bot" ? mobileBotAvatarStyle : mobileUserAvatarStyle
+                )}>
                   {msg.sender === "bot" ? "AI" : "You"}
                 </div>
                 <div style={msg.sender === "bot" ? botContentStyle : userContentStyle}>
-                  <div style={msg.sender === "bot" ? 
-                    getResponsiveStyle(botTextStyle, mobileBotTextStyle) : 
-                    getResponsiveStyle(userTextStyle, mobileUserTextStyle)}>
+                  <div style={responsiveStyle(
+                    msg.sender === "bot" ? botTextStyle : userTextStyle,
+                    msg.sender === "bot" ? mobileBotTextStyle : mobileUserTextStyle
+                  )}>
                     {msg.text}
                   </div>
                   <div style={messageMetaStyle}>
@@ -250,11 +298,11 @@ function App() {
           
           {/* Typing Indicator */}
           {loading && (
-            <div style={botMessageContainerStyle}>
-              <div style={getResponsiveStyle(botMessageStyle, mobileBotMessageStyle)}>
-                <div style={botAvatarStyle}>AI</div>
-                <div style={typingContainerStyle}>
-                  <div style={typingIndicatorStyle}>
+            <div style={responsiveStyle(botMessageContainerStyle, mobileBotMessageContainerStyle)}>
+              <div style={responsiveStyle(botMessageStyle, mobileBotMessageStyle)}>
+                <div style={responsiveStyle(botAvatarStyle, mobileBotAvatarStyle)}>AI</div>
+                <div style={responsiveStyle(typingContainerStyle, mobileTypingContainerStyle)}>
+                  <div style={responsiveStyle(typingIndicatorStyle, mobileTypingIndicatorStyle)}>
                     <div style={typingAnimationStyle}>
                       <span style={typingDotStyle}></span>
                       <span style={{...typingDotStyle, animationDelay: '0.2s'}}></span>
@@ -272,15 +320,21 @@ function App() {
       </div>
 
       {/* Input Area */}
-      <div style={darkMode ? darkInputContainerStyle : lightInputContainerStyle}>
-        <form onSubmit={handleSubmit} style={formStyle}>
-          <div style={getResponsiveStyle(inputWrapperStyle, mobileInputWrapperStyle)}>
+      <div style={responsiveStyle(
+        darkMode ? darkInputContainerStyle : lightInputContainerStyle,
+        darkMode ? mobileDarkInputContainerStyle : mobileLightInputContainerStyle
+      )}>
+        <form onSubmit={handleSubmit} style={responsiveStyle(formStyle, mobileFormStyle)}>
+          <div style={responsiveStyle(inputWrapperStyle, mobileInputWrapperStyle)}>
             <input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={isMobile ? "Type your message..." : "Type your message here... (Press Enter to send)"}
-              style={darkMode ? darkInputStyle : lightInputStyle}
+              placeholder={isMobile ? "Type a message..." : "Type your message here... (Press Enter to send)"}
+              style={responsiveStyle(
+                darkMode ? darkInputStyle : lightInputStyle,
+                darkMode ? mobileDarkInputStyle : mobileLightInputStyle
+              )}
               disabled={loading}
               onKeyPress={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -292,7 +346,10 @@ function App() {
             />
             <button 
               type="submit" 
-              style={input ? sendButtonActiveStyle : sendButtonStyle}
+              style={responsiveStyle(
+                input ? sendButtonActiveStyle : sendButtonStyle,
+                input ? mobileSendButtonActiveStyle : mobileSendButtonStyle
+              )}
               disabled={loading || !input.trim()}
               title="Send message"
             >
@@ -303,7 +360,7 @@ function App() {
               )}
             </button>
           </div>
-          <div style={inputFooterStyle}>
+          <div style={responsiveStyle(inputFooterStyle, mobileInputFooterStyle)}>
             <div style={darkMode ? darkHintStyle : lightHintStyle}>
               {isMobile ? "💡 Ask follow-up questions" : "💡 Tip: Ask follow-up questions for more detailed responses"}
             </div>
@@ -317,7 +374,10 @@ function App() {
   );
 }
 
-// Enhanced Styles
+// =============================================
+// DESKTOP STYLES
+// =============================================
+
 const containerStyle = {
   fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
   height: '100vh',
@@ -341,6 +401,7 @@ const headerStyle = {
   borderBottom: '1px solid',
   padding: '1rem 0',
   transition: 'all 0.3s ease',
+  flexShrink: 0,
 };
 
 const darkHeaderStyle = {
@@ -362,12 +423,6 @@ const headerContentStyle = {
   justifyContent: 'space-between',
   alignItems: 'center',
   padding: '0 1.5rem',
-};
-
-const mobileHeaderContentStyle = {
-  ...headerContentStyle,
-  padding: '0 1rem',
-  maxWidth: '100%',
 };
 
 const logoStyle = {
@@ -414,13 +469,12 @@ const titleStyle = {
   fontSize: '1.5rem',
   fontWeight: '700',
   lineHeight: '1.2',
-  // Fixed: Use solid color instead of gradient for better visibility
   color: 'inherit',
 };
 
 const darkTitleStyle = {
   ...titleStyle,
-  color: '#F8FAFC', // Solid light color for dark mode
+  color: '#F8FAFC',
 };
 
 const lightTitleStyle = {
@@ -449,13 +503,8 @@ const lightSubtitleStyle = {
 
 const headerControlsStyle = {
   display: 'flex',
-  gap: '0.5rem',
+  gap: '0.75rem',
   alignItems: 'center',
-};
-
-const mobileHeaderControlsStyle = {
-  ...headerControlsStyle,
-  gap: '0.25rem',
 };
 
 const buttonBaseStyle = {
@@ -509,23 +558,13 @@ const lightThemeButtonStyle = {
 const chatAreaStyle = {
   flex: 1,
   overflowY: 'auto',
-  padding: '1.5rem',
-  WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-};
-
-const mobileChatAreaStyle = {
-  ...chatAreaStyle,
-  padding: '1rem',
+  padding: '2rem 1.5rem',
+  WebkitOverflowScrolling: 'touch',
 };
 
 const messagesContainerStyle = {
   maxWidth: '900px',
   margin: '0 auto',
-};
-
-const mobileMessagesContainerStyle = {
-  ...messagesContainerStyle,
-  maxWidth: '100%',
 };
 
 const welcomeContainerStyle = {
@@ -538,22 +577,10 @@ const welcomeContainerStyle = {
   marginBottom: '2rem',
 };
 
-const mobileWelcomeContainerStyle = {
-  ...welcomeContainerStyle,
-  padding: '2rem 1rem',
-  marginBottom: '1rem',
-};
-
 const welcomeIconStyle = {
   fontSize: '4rem',
   marginBottom: '1.5rem',
   opacity: 0.9,
-};
-
-const mobileWelcomeIconStyle = {
-  ...welcomeIconStyle,
-  fontSize: '3rem',
-  marginBottom: '1rem',
 };
 
 const welcomeTitleStyle = {
@@ -561,11 +588,6 @@ const welcomeTitleStyle = {
   fontWeight: '700',
   margin: '0 0 1rem 0',
   lineHeight: '1.2',
-};
-
-const mobileWelcomeTitleStyle = {
-  ...welcomeTitleStyle,
-  fontSize: '1.5rem',
 };
 
 const darkWelcomeTitleStyle = {
@@ -587,12 +609,6 @@ const welcomeTextStyle = {
   marginRight: 'auto',
 };
 
-const mobileWelcomeTextStyle = {
-  ...welcomeTextStyle,
-  fontSize: '1rem',
-  margin: '0 0 1.5rem 0',
-};
-
 const darkWelcomeTextStyle = {
   ...welcomeTextStyle,
   color: 'rgba(248, 250, 252, 0.8)',
@@ -605,11 +621,6 @@ const lightWelcomeTextStyle = {
 
 const suggestionsContainerStyle = {
   marginTop: '2rem',
-};
-
-const mobileSuggestionsContainerStyle = {
-  ...suggestionsContainerStyle,
-  marginTop: '1.5rem',
 };
 
 const suggestionsTitleStyle = {
@@ -627,13 +638,6 @@ const suggestionsGridStyle = {
   gap: '0.75rem',
   maxWidth: '600px',
   margin: '0 auto',
-};
-
-const mobileSuggestionsGridStyle = {
-  ...suggestionsGridStyle,
-  gridTemplateColumns: '1fr',
-  gap: '0.5rem',
-  maxWidth: '100%',
 };
 
 const suggestionStyle = {
@@ -662,21 +666,11 @@ const lightSuggestionStyle = {
 
 const messageContainerBase = {
   display: 'flex',
-  marginBottom: '1.5rem',
-};
-
-const mobileMessageContainerBase = {
-  ...messageContainerBase,
-  marginBottom: '1rem',
+  marginBottom: '2rem',
 };
 
 const botMessageContainerStyle = {
   ...messageContainerBase,
-  justifyContent: 'flex-start',
-};
-
-const mobileBotMessageContainerStyle = {
-  ...mobileMessageContainerBase,
   justifyContent: 'flex-start',
 };
 
@@ -685,30 +679,15 @@ const userMessageContainerStyle = {
   justifyContent: 'flex-end',
 };
 
-const mobileUserMessageContainerStyle = {
-  ...mobileMessageContainerBase,
-  justifyContent: 'flex-end',
-};
-
 const messageStyle = {
   display: 'flex',
-  gap: '0.75rem',
+  gap: '1rem',
   maxWidth: '85%',
   alignItems: 'flex-start',
 };
 
-const mobileMessageStyle = {
-  ...messageStyle,
-  maxWidth: '95%',
-  gap: '0.5rem',
-};
-
 const botMessageStyle = {
   ...messageStyle,
-};
-
-const mobileBotMessageStyle = {
-  ...mobileMessageStyle,
 };
 
 const userMessageStyle = {
@@ -716,29 +695,17 @@ const userMessageStyle = {
   flexDirection: 'row-reverse',
 };
 
-const mobileUserMessageStyle = {
-  ...mobileMessageStyle,
-  flexDirection: 'row-reverse',
-};
-
 const avatarStyle = {
-  width: '36px',
-  height: '36px',
-  borderRadius: '10px',
+  width: '40px',
+  height: '40px',
+  borderRadius: '12px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '0.75rem',
+  fontSize: '0.8rem',
   fontWeight: '600',
   flexShrink: 0,
   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-};
-
-const mobileAvatarStyle = {
-  ...avatarStyle,
-  width: '32px',
-  height: '32px',
-  fontSize: '0.7rem',
 };
 
 const botAvatarStyle = {
@@ -747,20 +714,8 @@ const botAvatarStyle = {
   color: 'white',
 };
 
-const mobileBotAvatarStyle = {
-  ...mobileAvatarStyle,
-  background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-  color: 'white',
-};
-
 const userAvatarStyle = {
   ...avatarStyle,
-  background: 'linear-gradient(135deg, #10B981, #059669)',
-  color: 'white',
-};
-
-const mobileUserAvatarStyle = {
-  ...mobileAvatarStyle,
   background: 'linear-gradient(135deg, #10B981, #059669)',
   color: 'white',
 };
@@ -782,19 +737,12 @@ const userContentStyle = {
 };
 
 const textStyle = {
-  padding: '1rem 1.25rem',
-  borderRadius: '18px',
-  lineHeight: '1.5',
-  fontSize: '0.95rem',
+  padding: '1.25rem 1.5rem',
+  borderRadius: '20px',
+  lineHeight: '1.6',
+  fontSize: '1rem',
   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
   wordWrap: 'break-word',
-};
-
-const mobileTextStyle = {
-  ...textStyle,
-  padding: '0.75rem 1rem',
-  fontSize: '0.9rem',
-  borderRadius: '16px',
 };
 
 const botTextStyle = {
@@ -802,37 +750,22 @@ const botTextStyle = {
   backgroundColor: 'rgba(255, 255, 255, 0.95)',
   color: '#1E293B',
   border: '1px solid rgba(255, 255, 255, 0.2)',
-  borderBottomLeftRadius: '4px',
-};
-
-const mobileBotTextStyle = {
-  ...mobileTextStyle,
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  color: '#1E293B',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  borderBottomLeftRadius: '4px',
+  borderBottomLeftRadius: '6px',
 };
 
 const userTextStyle = {
   ...textStyle,
   background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
   color: 'white',
-  borderBottomRightRadius: '4px',
-};
-
-const mobileUserTextStyle = {
-  ...mobileTextStyle,
-  background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-  color: 'white',
-  borderBottomRightRadius: '4px',
+  borderBottomRightRadius: '6px',
 };
 
 const messageMetaStyle = {
   display: 'flex',
   alignItems: 'center',
-  gap: '0.5rem',
-  marginTop: '0.5rem',
-  fontSize: '0.75rem',
+  gap: '0.75rem',
+  marginTop: '0.75rem',
+  fontSize: '0.8rem',
 };
 
 const timeStyle = {
@@ -855,48 +788,43 @@ const copyButtonStyle = {
   cursor: 'pointer',
   opacity: 0.6,
   transition: 'opacity 0.2s ease',
-  fontSize: '0.75rem',
-  padding: '2px',
+  fontSize: '0.8rem',
+  padding: '4px',
 };
 
 const typingContainerStyle = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.5rem',
+  gap: '0.75rem',
 };
 
 const typingIndicatorStyle = {
   display: 'flex',
   alignItems: 'center',
-  gap: '0.75rem',
-  padding: '1rem 1.25rem',
+  gap: '1rem',
+  padding: '1.25rem 1.5rem',
   backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  borderRadius: '18px',
+  borderRadius: '20px',
   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
   border: '1px solid rgba(255, 255, 255, 0.2)',
-};
-
-const mobileTypingIndicatorStyle = {
-  ...typingIndicatorStyle,
-  padding: '0.75rem 1rem',
 };
 
 const typingAnimationStyle = {
   display: 'flex',
   alignItems: 'center',
-  gap: '4px',
+  gap: '6px',
 };
 
 const typingDotStyle = {
-  width: '8px',
-  height: '8px',
+  width: '10px',
+  height: '10px',
   borderRadius: '50%',
   backgroundColor: '#6366F1',
   animation: 'typing 1.4s infinite ease-in-out',
 };
 
 const typingTextStyle = {
-  fontSize: '0.8rem',
+  fontSize: '0.9rem',
   fontWeight: '500',
 };
 
@@ -911,15 +839,11 @@ const lightTypingTextStyle = {
 };
 
 const inputContainerStyle = {
-  padding: '1.5rem',
+  padding: '2rem 1.5rem',
   backdropFilter: 'blur(20px)',
   borderTop: '1px solid',
   transition: 'all 0.3s ease',
-};
-
-const mobileInputContainerStyle = {
-  ...inputContainerStyle,
-  padding: '1rem',
+  flexShrink: 0,
 };
 
 const darkInputContainerStyle = {
@@ -939,44 +863,26 @@ const formStyle = {
   margin: '0 auto',
 };
 
-const mobileFormStyle = {
-  ...formStyle,
-  maxWidth: '100%',
-};
-
 const inputWrapperStyle = {
   display: 'flex',
-  gap: '0.75rem',
+  gap: '1rem',
   alignItems: 'flex-end',
-  marginBottom: '0.5rem',
-};
-
-const mobileInputWrapperStyle = {
-  ...inputWrapperStyle,
-  gap: '0.5rem',
-  marginBottom: '0.25rem',
+  marginBottom: '0.75rem',
 };
 
 const inputStyle = {
   flex: 1,
-  padding: '1rem 1.25rem',
-  borderRadius: '16px',
+  padding: '1.25rem 1.5rem',
+  borderRadius: '20px',
   border: '1px solid',
   fontSize: '1rem',
   outline: 'none',
   backgroundColor: 'rgba(255, 255, 255, 0.9)',
   boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)',
   resize: 'none',
-  minHeight: '52px',
+  minHeight: '60px',
   fontFamily: 'inherit',
   transition: 'all 0.2s ease',
-};
-
-const mobileInputStyle = {
-  ...inputStyle,
-  padding: '0.875rem 1rem',
-  minHeight: '48px',
-  fontSize: '16px', // Prevents zoom on iOS
 };
 
 const darkInputStyle = {
@@ -992,27 +898,21 @@ const lightInputStyle = {
 };
 
 const sendButtonStyle = {
-  padding: '0.875rem',
+  padding: '1rem',
   backgroundColor: 'rgba(99, 102, 241, 0.3)',
   color: 'white',
   border: 'none',
-  borderRadius: '14px',
+  borderRadius: '16px',
   fontSize: '1rem',
   cursor: 'not-allowed',
   fontWeight: '600',
-  width: '52px',
-  height: '52px',
+  width: '60px',
+  height: '60px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   transition: 'all 0.2s ease',
   opacity: 0.5,
-};
-
-const mobileSendButtonStyle = {
-  ...sendButtonStyle,
-  width: '48px',
-  height: '48px',
 };
 
 const sendButtonActiveStyle = {
@@ -1023,22 +923,14 @@ const sendButtonActiveStyle = {
   boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
 };
 
-const mobileSendButtonActiveStyle = {
-  ...mobileSendButtonStyle,
-  backgroundColor: 'rgba(99, 102, 241, 0.9)',
-  cursor: 'pointer',
-  opacity: 1,
-  boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
-};
-
 const sendIconStyle = {
-  fontSize: '1.2rem',
+  fontSize: '1.4rem',
   fontWeight: 'bold',
 };
 
 const spinnerStyle = {
-  width: '16px',
-  height: '16px',
+  width: '20px',
+  height: '20px',
   border: '2px solid transparent',
   borderTop: '2px solid white',
   borderRadius: '50%',
@@ -1049,17 +941,11 @@ const inputFooterStyle = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-};
-
-const mobileInputFooterStyle = {
-  ...inputFooterStyle,
-  flexDirection: 'column',
-  gap: '0.25rem',
-  alignItems: 'flex-start',
+  marginTop: '0.5rem',
 };
 
 const hintStyle = {
-  fontSize: '0.75rem',
+  fontSize: '0.85rem',
   opacity: 0.7,
 };
 
@@ -1074,8 +960,287 @@ const lightHintStyle = {
 };
 
 const characterCountStyle = {
-  fontSize: '0.75rem',
+  fontSize: '0.85rem',
   opacity: 0.5,
+};
+
+// =============================================
+// MOBILE STYLES
+// =============================================
+
+const mobileContainerStyle = {
+  ...containerStyle,
+  height: '100vh',
+  height: '100dvh', // Dynamic viewport height for mobile
+};
+
+const mobileDarkContainerStyle = {
+  ...mobileContainerStyle,
+  background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%)',
+};
+
+const mobileLightContainerStyle = {
+  ...mobileContainerStyle,
+  background: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)',
+};
+
+const mobileHeaderStyle = {
+  ...headerStyle,
+  padding: '0.75rem 0',
+  backdropFilter: 'blur(10px)',
+};
+
+const mobileDarkHeaderStyle = {
+  ...mobileHeaderStyle,
+  backgroundColor: 'rgba(15, 23, 42, 0.9)',
+  borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+};
+
+const mobileLightHeaderStyle = {
+  ...mobileHeaderStyle,
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+};
+
+const mobileHeaderContentStyle = {
+  ...headerContentStyle,
+  padding: '0 1rem',
+  maxWidth: '100%',
+};
+
+const mobileHeaderControlsStyle = {
+  display: 'flex',
+  gap: '0.5rem',
+  alignItems: 'center',
+};
+
+const mobileIconButtonStyle = {
+  padding: '0.5rem',
+  border: 'none',
+  borderRadius: '8px',
+  fontSize: '1rem',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '40px',
+  height: '40px',
+};
+
+const mobileDarkIconButtonStyle = {
+  ...mobileIconButtonStyle,
+  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  color: '#94A3B8',
+};
+
+const mobileLightIconButtonStyle = {
+  ...mobileIconButtonStyle,
+  backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  color: '#64748B',
+};
+
+const mobileChatAreaStyle = {
+  ...chatAreaStyle,
+  padding: '1rem',
+  paddingBottom: '1.5rem',
+};
+
+const mobileMessagesContainerStyle = {
+  ...messagesContainerStyle,
+  maxWidth: '100%',
+};
+
+const mobileWelcomeContainerStyle = {
+  ...welcomeContainerStyle,
+  padding: '2.5rem 1.5rem',
+  marginBottom: '1.5rem',
+  borderRadius: '20px',
+};
+
+const mobileWelcomeIconStyle = {
+  ...welcomeIconStyle,
+  fontSize: '3rem',
+  marginBottom: '1rem',
+};
+
+const mobileWelcomeTitleStyle = {
+  ...welcomeTitleStyle,
+  fontSize: '1.5rem',
+  margin: '0 0 0.75rem 0',
+};
+
+const mobileWelcomeTextStyle = {
+  ...welcomeTextStyle,
+  fontSize: '1rem',
+  margin: '0 0 1.5rem 0',
+  lineHeight: '1.5',
+};
+
+const mobileSuggestionsGridStyle = {
+  ...suggestionsGridStyle,
+  gridTemplateColumns: '1fr',
+  gap: '0.5rem',
+  maxWidth: '100%',
+};
+
+const mobileMessageContainerBase = {
+  display: 'flex',
+  marginBottom: '1.5rem',
+};
+
+const mobileBotMessageContainerStyle = {
+  ...mobileMessageContainerBase,
+  justifyContent: 'flex-start',
+};
+
+const mobileUserMessageContainerStyle = {
+  ...mobileMessageContainerBase,
+  justifyContent: 'flex-end',
+};
+
+const mobileMessageStyle = {
+  display: 'flex',
+  gap: '0.75rem',
+  maxWidth: '90%',
+  alignItems: 'flex-start',
+};
+
+const mobileBotMessageStyle = {
+  ...mobileMessageStyle,
+};
+
+const mobileUserMessageStyle = {
+  ...mobileMessageStyle,
+  flexDirection: 'row-reverse',
+};
+
+const mobileAvatarStyle = {
+  ...avatarStyle,
+  width: '36px',
+  height: '36px',
+  borderRadius: '10px',
+  fontSize: '0.7rem',
+};
+
+const mobileBotAvatarStyle = {
+  ...mobileAvatarStyle,
+  background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+  color: 'white',
+};
+
+const mobileUserAvatarStyle = {
+  ...mobileAvatarStyle,
+  background: 'linear-gradient(135deg, #10B981, #059669)',
+  color: 'white',
+};
+
+const mobileTextStyle = {
+  padding: '1rem 1.25rem',
+  borderRadius: '18px',
+  lineHeight: '1.5',
+  fontSize: '0.95rem',
+  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+  wordWrap: 'break-word',
+};
+
+const mobileBotTextStyle = {
+  ...mobileTextStyle,
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  color: '#1E293B',
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  borderBottomLeftRadius: '6px',
+};
+
+const mobileUserTextStyle = {
+  ...mobileTextStyle,
+  background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+  color: 'white',
+  borderBottomRightRadius: '6px',
+};
+
+const mobileTypingContainerStyle = {
+  ...typingContainerStyle,
+  gap: '0.5rem',
+};
+
+const mobileTypingIndicatorStyle = {
+  ...typingIndicatorStyle,
+  padding: '1rem 1.25rem',
+  gap: '0.75rem',
+};
+
+const mobileInputContainerStyle = {
+  ...inputContainerStyle,
+  padding: '1.5rem 1rem',
+  backdropFilter: 'blur(10px)',
+};
+
+const mobileDarkInputContainerStyle = {
+  ...mobileInputContainerStyle,
+  backgroundColor: 'rgba(15, 23, 42, 0.9)',
+  borderTopColor: 'rgba(255, 255, 255, 0.1)',
+};
+
+const mobileLightInputContainerStyle = {
+  ...mobileInputContainerStyle,
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  borderTopColor: 'rgba(0, 0, 0, 0.1)',
+};
+
+const mobileFormStyle = {
+  ...formStyle,
+  maxWidth: '100%',
+};
+
+const mobileInputWrapperStyle = {
+  ...inputWrapperStyle,
+  gap: '0.75rem',
+  marginBottom: '0.5rem',
+};
+
+const mobileInputStyle = {
+  ...inputStyle,
+  padding: '1rem 1.25rem',
+  minHeight: '56px',
+  fontSize: '16px',
+  borderRadius: '18px',
+};
+
+const mobileDarkInputStyle = {
+  ...mobileInputStyle,
+  borderColor: 'rgba(255, 255, 255, 0.2)',
+  color: '#1E293B',
+};
+
+const mobileLightInputStyle = {
+  ...mobileInputStyle,
+  borderColor: 'rgba(0, 0, 0, 0.1)',
+  color: '#1E293B',
+};
+
+const mobileSendButtonStyle = {
+  ...sendButtonStyle,
+  width: '56px',
+  height: '56px',
+  borderRadius: '14px',
+  padding: '0.875rem',
+};
+
+const mobileSendButtonActiveStyle = {
+  ...mobileSendButtonStyle,
+  backgroundColor: 'rgba(99, 102, 241, 0.9)',
+  cursor: 'pointer',
+  opacity: 1,
+  boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
+};
+
+const mobileInputFooterStyle = {
+  ...inputFooterStyle,
+  flexDirection: 'column',
+  gap: '0.25rem',
+  alignItems: 'flex-start',
+  marginTop: '0.25rem',
 };
 
 // Add CSS animations
@@ -1093,11 +1258,13 @@ document.head.insertAdjacentHTML('beforeend', `
     
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
     
     body {
       margin: 0;
       background: #f5f5f5;
+      overflow: hidden;
     }
     
     /* Custom scrollbar */
@@ -1153,15 +1320,14 @@ document.head.insertAdjacentHTML('beforeend', `
       opacity: 1 !important;
     }
 
-    /* Mobile responsiveness */
+    /* Mobile optimizations */
     @media (max-width: 768px) {
-      .mobile-hidden {
-        display: none !important;
+      body {
+        -webkit-text-size-adjust: 100%;
       }
       
-      .mobile-full-width {
-        width: 100% !important;
-        max-width: 100% !important;
+      input, textarea {
+        font-size: 16px !important; /* Prevent zoom on iOS */
       }
     }
   </style>
