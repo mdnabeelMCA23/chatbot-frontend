@@ -54,6 +54,68 @@ function App() {
     });
   }, [chatHistory, loading]);
 
+  // Function to format bot response with proper bullet points
+  const formatBotResponse = (text) => {
+    if (!text) return text;
+
+    // Split by common bullet point indicators
+    const lines = text.split(/\n|\r\n/);
+    let formattedText = [];
+    let inList = false;
+
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+      
+      // Check if line starts with common bullet point patterns
+      if (trimmedLine.match(/^[•\-*\d+\.]\s/) || 
+          trimmedLine.match(/^\d+\)\s/) ||
+          trimmedLine.startsWith("- ") ||
+          trimmedLine.startsWith("* ") ||
+          trimmedLine.startsWith("• ")) {
+        
+        if (!inList) {
+          formattedText.push('<ul style="margin: 0; padding-left: 1.5rem; margin-bottom: 0.5rem;">');
+          inList = true;
+        }
+        
+        // Clean the bullet point and wrap in li
+        const cleanLine = trimmedLine
+          .replace(/^[•\-*\d+\.]\s/, '')
+          .replace(/^\d+\)\s/, '')
+          .replace(/^-\s/, '')
+          .replace(/^\*\s/, '')
+          .replace(/^•\s/, '');
+        
+        formattedText.push(`<li style="margin-bottom: 0.25rem;">${cleanLine}</li>`);
+      } else {
+        if (inList && trimmedLine === '') {
+          formattedText.push('</ul>');
+          inList = false;
+        }
+        
+        if (trimmedLine) {
+          if (inList) {
+            formattedText.push('</ul>');
+            inList = false;
+          }
+          formattedText.push(`<div style="margin-bottom: 0.5rem;">${trimmedLine}</div>`);
+        }
+      }
+    });
+
+    // Close any open list
+    if (inList) {
+      formattedText.push('</ul>');
+    }
+
+    // If no formatting was applied, return original text
+    if (formattedText.length === 0) {
+      return text.replace(/\n/g, '<br/>');
+    }
+
+    return formattedText.join('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
@@ -75,6 +137,7 @@ function App() {
       const botMessage = { 
         sender: "bot", 
         text: res.data.botReply,
+        formattedText: formatBotResponse(res.data.botReply),
         timestamp: new Date().toISOString(),
         id: Date.now() + 1
       };
@@ -83,6 +146,7 @@ function App() {
       const errorMessage = {
         sender: "bot",
         text: "I apologize, but I'm experiencing connectivity issues. Please try again in a moment.",
+        formattedText: "I apologize, but I'm experiencing connectivity issues. Please try again in a moment.",
         timestamp: new Date().toISOString(),
         id: Date.now() + 1
       };
@@ -271,12 +335,17 @@ function App() {
                   {msg.sender === "bot" ? "AI" : "You"}
                 </div>
                 <div style={msg.sender === "bot" ? botContentStyle : userContentStyle}>
-                  <div style={responsiveStyle(
-                    msg.sender === "bot" ? botTextStyle : userTextStyle,
-                    msg.sender === "bot" ? mobileBotTextStyle : mobileUserTextStyle
-                  )}>
-                    {msg.text}
-                  </div>
+                  <div 
+                    style={responsiveStyle(
+                      msg.sender === "bot" ? botTextStyle : userTextStyle,
+                      msg.sender === "bot" ? mobileBotTextStyle : mobileUserTextStyle
+                    )}
+                    dangerouslySetInnerHTML={{
+                      __html: msg.sender === "bot" && msg.formattedText 
+                        ? msg.formattedText 
+                        : msg.text.replace(/\n/g, '<br/>')
+                    }}
+                  />
                   <div style={messageMetaStyle}>
                     <span style={darkMode ? darkTimeStyle : lightTimeStyle}>
                       {formatTime(msg.timestamp)}
