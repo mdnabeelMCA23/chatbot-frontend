@@ -215,7 +215,7 @@ function App() {
             </div>
             <div style={logoTextStyle}>
               <h1 style={darkMode ? darkTitleStyle : lightTitleStyle}>
-                {isMobile ? 'Ayisha AI' : 'Ayisha AI Assistant'}
+                {isMobile ? 'MN AI' : 'MN AI Assistant'}
               </h1>
               {!isMobile && (
                 <p style={darkMode ? darkSubtitleStyle : lightSubtitleStyle}>
